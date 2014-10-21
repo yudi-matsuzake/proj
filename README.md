@@ -7,20 +7,26 @@ Small C/C++ local projects manager.
 
 **proj**
 
-	Creates a simple project that contains.
+```Shell
+	proj [OPTIONS] [SOURCES]
+```
+
+	Creates a simple project that contains:
 	
 * one sources folder (src/)
 * one headers folder (headers/)
 * Makefile
 
-	proj [OPTIONS] [SOURCES]
+**Options**
 
-* Options
+**-p**		Sets the project name
 
-	-p		Sets the project name
-	-h		Header name
-	-m		Main name
-	-+		c++ project
+**-h**		Header name
+
+**-m**		Main name
+
+**-+**		c++ project
+
 
 **Example**
 
@@ -30,23 +36,26 @@ Small C/C++ local projects manager.
 
 **projrm**
 
-	Removes a project.
 ```Shell
 	projrm project_name
 ```
 
+	Removes a project.
+
+
 **projls**
-	
-	Lists the projects created by proj.
+
 ```Shell
 	projls
-```
+```	
+
+	Lists the projects created by proj.
 	
 **projdir**
 
-	Prints the project's path directory.
-	
 ```Shell
 	projdir project_name.
 ```
+
+	Prints the project's path directory.
 
