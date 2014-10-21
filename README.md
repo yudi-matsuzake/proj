@@ -1,11 +1,11 @@
 proj
 ====
 
-Small local C/C++ projects manager.
+Small C/C++ local projects manager.
 
 ##Commands
 
-1. proj
+**proj**
 
 	Creates a simple project that contains.
 	
@@ -21,25 +21,32 @@ Small local C/C++ projects manager.
 	-h		Header name
 	-m		Main name
 	-+		c++ project
-	
-**Example**
-proj -p test -m teste.c -h functions functions.c
 
-2. projrm
+**Example**
+
+```Shell
+	proj -p test -m teste.c -h functions functions.c
+```
+
+**projrm**
 
 	Removes a project.
-	
+```Shell
 	projrm project_name
+```
 
-3. projls
+**projls**
 	
 	Lists the projects created by proj.
-	
+```Shell
 	projls
+```
 	
-4. projdir
+**projdir**
 
 	Prints the project's path directory.
 	
+```Shell
 	projdir project_name.
+```
 
