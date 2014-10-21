@@ -1,0 +1,76 @@
+#!/bin/bash
+
+projs=( $( ls ~/.Projects/ ) )
+
+n_proj=${#projs[@]}
+
+#Nome das colunas
+col1="Project Name"
+col2="Directory"
+
+
+maior=$(( ${#col1} ))
+
+#Tamanho do maior nome de projeto
+for i in ${projs[@]}
+do
+	if [ ${#i} -gt $maior ]
+	then
+		maior=${#i}
+	fi
+done
+
+#Largura
+col_lar=$(( $maior + 5 ))
+
+#Coluna 1 imprime
+echo -n $col1
+i=$(( $col_lar - ${#col1} ))
+
+while [ $i -gt 0 ]
+do
+	echo -n ' '
+	i=$(( $i - 1 ))
+done
+echo "| $col2"
+
+#Imprime linha abaixo do titulo das colunas
+
+#parte da esquerda
+i=$col_lar
+while [ $i -gt 0 ]
+do
+	echo -n '-'
+	i=$(( $i - 1 ))
+done
+
+#divisão
+echo -n '+'
+
+#parte da direita
+i=$col_lar
+while [ $i -gt 0 ]
+do
+	echo -n '-'
+	i=$(( $i - 1 ))
+done
+echo
+
+#escreve as linhas
+
+for p in ${projs[@]}
+do
+	pdir=$(readlink ~/.Projects/$p)
+	
+	echo -n $p
+	
+	
+	i=$(( $col_lar - ${#p} ))
+	while [ $i -gt 0 ]
+	do
+		echo -n ' '
+		i=$(( $i - 1 ))
+	done
+	echo "| $pdir"
+	
+done

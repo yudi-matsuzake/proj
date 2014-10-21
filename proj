@@ -1,0 +1,232 @@
+#!/bin/bash
+
+#p project name
+#h headers
+#m main
+#+ cpp
+
+project=0
+has_header=0
+
+headers=""
+headers_project=""
+project_name=""
+srcs_project=""
+cmm=0
+main=""
+
+while getopts "p:h:m:+" OPTION
+do
+	case $OPTION in
+		p)	#algum projeto ja foi declarado?
+			if [ $project -eq 0 ] ;
+			then 
+				project=1 ;
+				project_name=$OPTARG ;
+			else
+				echo "Projects can only have one name. The project name will remain \"$project_name\"!"
+			fi
+			;;
+		h) 	#tem o .h no final?
+			if [ -z ${OPTARG#*.h} ]
+			then
+				headers="$headers $OPTARG"
+			else
+				headers="$headers $OPTARG.h"
+			fi
+			has_header=1
+		   
+		   ;;
+		m) main=$OPTARG
+			;;
+		+) cmm=1
+			;;
+	esac
+done
+
+shift $((OPTIND-1))
+
+if [ $has_header = 0 ]
+then
+	headers="header.h"
+fi
+
+for h in $headers
+do
+	headers_project="$headers_project\n#include \"${h,,}\""
+done
+
+hbase(){
+	echo -e \
+	"#ifndef _$1_H_\n#define _$1_H_\n\
+\n#endif\n" > "$2"
+}
+
+
+
+c_header=\
+"#include <stdlib.h>\n\
+#include <stdio.h>\n\
+$headers_project"
+
+c_main=\
+"\
+\nint main(int argc, char* argv[]){\n\
+\n\tprintf(\"Hello World!\\\n\");\n\n\
+\treturn 0;\n\
+}"
+
+cpp_main=\
+"\
+\nint main(int argc, char* argv[]){\n\
+\n\tcout << \"Hello Word!\" << endl;\n\n\
+\treturn 0;\n\
+}"
+
+cpp_header=\
+"#include <iostream>\n\
+#include <cstdlib>\n\
+$headers_project\n\
+using namespace std;\n\
+"
+
+if [ $cmm -eq 0 ]
+then
+	#c
+	if [[ ${main#*.c} != "" ]]	
+	then
+		main="$main.c"
+	fi
+	
+	for src in $*
+	do
+		if [ -z ${src#*.c} ] 
+		then
+			srcs_project="$srcs_project $src"
+		else
+			srcs_project="$srcs_project $src.c"
+		fi			
+	done
+	
+else
+	#c++
+	if [[ ${main#*.cpp} != "" ]]
+	then
+		main="$main.cpp"
+	fi
+	
+	for src in $*
+	do
+		if [ ${src#*.cpp!}="" ]
+		then
+			srcs_project="$srcs_project $src.cpp"
+		else
+			srcs_project="$srcs_project $src"
+		fi			
+	done
+
+fi
+
+if [[ $main = "" ]] 
+then main=${srcs_project[0]#' '}
+	if [ ${#srcs[@]} -gt 0 ]
+	then
+		srcs_project=(${srcs_project[@]:1})
+	else
+		srcs_project=""
+	fi
+fi
+
+if [ $project -eq 1 ]
+then
+	mkdir $project_name
+	cd $project_name
+else
+	project_name="${main%.c}"
+fi
+
+#Se o projeto só tem um nome, o main será o nome do projeto
+if [[ $main = "" ]]
+then
+	if [ $cmm -eq 0 ]
+	then
+		main="$project_name.c"
+	else
+		main="$project_name.cpp"
+	fi
+fi
+
+mkdir src
+mkdir headers
+
+#criando headers
+for h in $headers
+do
+	header=${h%.h}
+	hbase "${header^^}" "headers/$h"
+done
+
+
+
+if [ $cmm -eq 0 ]
+then
+	#criando main
+	echo -e $c_header > "src/$main"	
+	
+	#criando main function
+	echo -e $c_main >> "src/$main"
+	
+	#criando outros srcs
+	for src in $srcs_project
+	do
+		echo -e $c_header > "src/$src"
+	done
+	
+	#criando makefile
+	echo -e\
+	"$project_name:\theaders/*.h src/*.c\n\tgcc src/*.c -o $project_name -Iheaders/" > Makefile
+	
+else
+	#criando main
+	echo -e $cpp_header > "src/$main"
+	
+	#criando main function
+	echo -e $cpp_main >> "src/$main"
+	
+	#criando outros srcs
+	for src in $srcs_project
+	do
+		echo -e $c_header > "src/$src"
+	done
+	
+	#makefile
+	echo -e\
+	"$project_name:\theaders/* src/*\n\t\tg++ src/*.cpp -o $project_name -Iheaders/" > Makefile
+fi
+
+#cria projeto global
+current_path=$( pwd )
+
+if cd ~/.Projects/ 2> /dev/null
+then
+	ln -s $current_path $project_name
+else
+	mkdir ~/.Projects/
+	cd ~/.Projects/
+	ln -s $current_path $project_name
+fi
+
+cd $current_path
+
+#opção de abrir
+echo "Do you want to open the files of the project?[n|no, s|sublime, g|gedit]"
+read opcao
+
+case $opcao in
+	n|no)
+		exit ;;
+	s|sublime)
+		sublime_text src/* headers/* Makefile ;;
+	g|gedit)
+		gedit src/* headers/* Makefile ;;
+esac
